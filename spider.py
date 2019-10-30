@@ -27,6 +27,17 @@ def dump_response(response, level=1):
         print(response.body.decode())
 
 
+def cookies_update(headers_source, headers_target):
+    if 'cookie' in headers_target:
+        del headers_target['cookie']
+
+    for cookie in headers_source.get_list('set-cookie'):
+        headers_target.add("Cookie", cookie)
+
+    debug("updated cookies:")
+    debug('\n'.join(headers_target.get_list('cookie')))
+
+
 async def crawl(root):
 
     httpclient.AsyncHTTPClient.configure(
@@ -45,6 +56,9 @@ async def crawl(root):
 
     response = await client.fetch(target, headers=request_headers)
     dump_response(response, verbose)
+
+    # ensure php session id
+    cookies_update(response.headers, request_headers)
 
     dom = Soup(response.body.decode(), 'lxml')
     token = dom.select_one("form input[name='user_token']").get('value')
