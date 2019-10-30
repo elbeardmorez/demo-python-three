@@ -1,7 +1,7 @@
 import sys
 import argparse
 import asyncio
-from tornado import httpclient
+from tornado import httpclient, httputil
 from bs4 import BeautifulSoup as Soup
 import urllib
 
@@ -33,11 +33,17 @@ async def crawl(root):
         "tornado.curl_httpclient.CurlAsyncHTTPClient")
     client = httpclient.AsyncHTTPClient(force_instance=True)
 
+    request_headers = httputil.HTTPHeaders()
+    request_headers.add("Keep-Alive", "timeout=5, max=100")
+    request_headers.add("Connection", "Keep-Alive")
+    request_headers.add("DNT", "1")
+    request_headers.add("Upgrade-Insecure-Requests", "1")
+
     # authentication, parse login for credentials
     target = root + '/login.php'
     debug(f"crawling '{target}'")
 
-    response = await client.fetch(target)
+    response = await client.fetch(target, headers=request_headers)
     dump_response(response, verbose)
 
     dom = Soup(response.body.decode(), 'lxml')
@@ -52,6 +58,7 @@ async def crawl(root):
 
     response = await client.fetch(
                    target, method='POST',
+                   headers=request_headers,
                    body=body, follow_redirects=True)
     dump_response(response, verbose)
 
@@ -59,7 +66,7 @@ async def crawl(root):
     target = root + '/vulnerabilities/sqli/'
     debug(f"crawling '{target}'")
 
-    response = await client.fetch(target)
+    response = await client.fetch(target, headers=request_headers)
     dump_response(response, verbose)
 
     client.close()
