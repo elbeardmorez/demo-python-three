@@ -5,6 +5,7 @@ import asyncio
 from tornado import httpclient, httputil
 from bs4 import BeautifulSoup as Soup
 import urllib
+from collections import OrderedDict
 
 verbose = 0
 
@@ -29,11 +30,22 @@ def dump_response(response, level=1):
 
 
 def cookies_update(headers_source, headers_target):
+    if 'set-cookie' not in headers_source:
+        return
     if 'cookie' in headers_target:
         del headers_target['cookie']
 
-    for cookie in headers_source.get_list('set-cookie'):
-        headers_target.add("Cookie", cookie)
+    # merge set-cookie pairs
+    map_ = OrderedDict()
+    for cookies in headers_source.get_list('set-cookie'):
+        for cookie in cookies.split(';'):
+            if cookie.find("=") == -1:
+                cookie += "="
+            (k, v) = cookie.strip().split("=")
+            map_[k] = v
+    headers_target.add("Cookie", "; ".join(f"{k}={v}"
+                       if v != '' else k
+                       for (k, v) in map_.items()))
 
     debug("updated cookies:")
     debug('\n'.join(headers_target.get_list('cookie')))
