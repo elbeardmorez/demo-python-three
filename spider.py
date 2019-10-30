@@ -55,9 +55,11 @@ async def spider():
     parser.add_argument(
         'target', metavar='TARGET', type=str,
         help="base url to initialise crawl from")
+    # bug: failure of optional followed by positional
+    # https://bugs.python.org/issue9338
     parser.add_argument(
-        '-v', '--verbose', metavar='LEVEL', nargs='?',
-        const=1, default=0, type=int,
+        '-v', '--verbose', metavar='LEVEL',
+        default=0, type=int,
         help="increase the level of information output")
 
     if not sys.argv[1:]:
