@@ -89,6 +89,33 @@ optional arguments:
                         increase the level of information output
 ```
 
+### architectual framework components
+#### user input
+- provide target / root
+- reset target cache
+- node mode, server (default) / worker
+#### node container
+- scraping / parsing logic
+- identify further urls
+#### runner
+- server, providing communication end-points to farm out available work
+- output results
+- block node operations while not logged in
+- url pools, maps for processed / processing / to process, mutexes for access
+#### storage
+- user/node states, authenticate logon
+- urls, semi-regularly synchronised with memory pools for recovery
+- results, vulnerable urls
+#### api
+- get_scrape_url_next
+- send_scraped_urls
+#### unit test suite
+- api handles
+- mock vulnerable server with static form templates
+
+### architectural design (C4 methodolody)
+![architectural design](architecture.png)
+
 ## dependencies
 - docker
 - dvwa

@@ -1,0 +1,62 @@
+@startuml architecture
+
+skinparam backgroundColor #ddd
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Context.puml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Container.puml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+skinparam title {
+  FontSize 26
+}
+title \n'Spider' Architecture
+
+Container_Boundary(master, "Master") {
+  System_Boundary(app, "Spider") #white {
+    Container_Boundary(node, "work node") #lavender {
+      Component(scraper, "scraper", "tornado web client", "host content scraper")
+      Component(parser, "parser", "beautiful soup", "content link parser")
+    }
+    Component(web , "REST-like service", "tornado web server", "end-points for workers")
+    Component(api, "API", "python 3.5+", "app logic")
+    Component(runner, "runner", "app / server start and configuration")
+  }
+  SystemDb(storage, "mongodb", "crawl state, scraped, pending")
+  Person(user, "User", "cmdline interface")
+}
+System(dvwa, "DVWA", "vulnerable host")
+Container_Boundary(slave, "Slave(s)") {
+  Person(slave_user, "Slave", "cmdline interface")
+}
+
+Rel(api, scraper, "urls in scope")
+Rel(scraper, parser, "bodies")
+Rel(scraper, api, "links")
+Rel(parser, scraper, "links")
+Rel(api, runner, "results")
+Rel(scraper, dvwa, "http request")
+Rel(dvwa, scraper, "http response")
+Rel(storage, api, "state")
+Rel(api, storage, "state")
+Rel(runner, api, "master work requests")
+Rel(api, web, "urls in scope")
+Rel(web, api, "links")
+Rel(web, slave, "urls in scope")
+Rel(slave, web, "links")
+Rel(web, api, "remote work requests")
+Rel(user, runner, "cmdline", "start / target / mode")
+
+Lay_R(slave, dvwa)
+Lay_U(user, storage)
+Lay_L(web, node)
+
+legend right
+  |=         |= Type |
+  |<PERSON_BG_COLOR>         | user |
+  |<back:#white>          </back>| system |
+  |<back:#lavender>         </back>| container |
+  |<COMPONENT_BG_COLOR>         | component |
+  |<SYSTEM_BG_COLOR>         | external system |
+endlegend
+
+@enduml
