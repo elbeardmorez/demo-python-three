@@ -1,5 +1,6 @@
 import sys
 import argparse
+import re
 import asyncio
 from tornado import httpclient, httputil
 from bs4 import BeautifulSoup as Soup
@@ -36,6 +37,26 @@ def cookies_update(headers_source, headers_target):
 
     debug("updated cookies:")
     debug('\n'.join(headers_target.get_list('cookie')))
+
+
+def cookies_override(headers, key, value):
+    update = 0
+    cookies = []
+    if 'cookie' in headers:
+        rx = key + '=([a-zA-Z]+)'
+        for cookie in headers.get_list('cookie'):
+            if cookie.find(f"{key}=") > -1:
+                cookies.append(re.sub(rx, f"{key}={value}", cookie))
+                update = 1
+            else:
+                cookies.append(cookie)
+        del headers['cookie']
+    if update == 0:
+        cookies.append(f"{key}={value}")
+    for cookie in cookies:
+        headers.add("Cookie", cookie)
+    debug(f"{'overrode' if update == 0 else 'set'} {key} cookie:")
+    debug('\n'.join(headers.get_list('cookie')))
 
 
 async def crawl(root):
@@ -77,6 +98,10 @@ async def crawl(root):
     dump_response(response, verbose)
 
     # sql-injection compromise
+
+    # override security cookie
+    cookies_override(request_headers, "security", "low")
+
     target = root + '/vulnerabilities/sqli/'
     debug(f"crawling '{target}'")
 
