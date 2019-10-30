@@ -11,13 +11,17 @@ def debug(*args):
         print("[debug]", *args)
 
 
-def dump_response(response):
+def dump_response(response, level=1):
+    if level == 0:
+        return
+    if level >= 1:
     print("headers:")
     for (k, v) in response.headers.get_all():
         print(f"{k}: {v}")
-    print("cookies:")
+        debug("cookies:")
     print('\n'.join(response.headers.get_list('set-cookie')))
-    print("body:")
+    if level >= 2:
+        debug("body:")
     print(response.body.decode())
 
 
@@ -32,14 +36,14 @@ async def crawl(root):
     debug(f"crawling '{target}'")
 
     response = await client.fetch(target)
-    dump_response(response)
+    dump_response(response, verbose)
 
     # sql-injection compromise
     target = root + '/vulnerabilities/sqli/'
     debug(f"crawling '{target}'")
 
     response = await client.fetch(target)
-    dump_response(response)
+    dump_response(response, verbose)
 
     client.close()
 
@@ -52,8 +56,8 @@ async def spider():
         'target', metavar='TARGET', type=str,
         help="base url to initialise crawl from")
     parser.add_argument(
-        '-v', '--verbose', action='store_const',
-        const=True, default=False,
+        '-v', '--verbose', metavar='LEVEL', nargs='?',
+        const=1, default=0, type=int,
         help="increase the level of information output")
 
     if not sys.argv[1:]:
