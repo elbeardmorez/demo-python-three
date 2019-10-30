@@ -2,6 +2,8 @@ import sys
 import argparse
 import asyncio
 from tornado import httpclient
+from bs4 import BeautifulSoup as Soup
+import urllib
 
 verbose = 0
 
@@ -31,11 +33,26 @@ async def crawl(root):
         "tornado.curl_httpclient.CurlAsyncHTTPClient")
     client = httpclient.AsyncHTTPClient(force_instance=True)
 
-    # authentication
+    # authentication, parse login for credentials
     target = root + '/login.php'
     debug(f"crawling '{target}'")
 
     response = await client.fetch(target)
+    dump_response(response, verbose)
+
+    dom = Soup(response.body.decode(), 'lxml')
+    token = dom.select_one("form input[name='user_token']").get('value')
+    post_data = {
+        'Login': 'Login',
+        'user_token': token,
+        'username': 'admin',
+        'password': 'password',
+    }
+    body = urllib.parse.urlencode(post_data)
+
+    response = await client.fetch(
+                   target, method='POST',
+                   body=body, follow_redirects=True)
     dump_response(response, verbose)
 
     # sql-injection compromise
