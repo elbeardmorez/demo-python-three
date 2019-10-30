@@ -70,6 +70,25 @@ First name: admin@localhost
 Surname: 5.5.47-0ubuntu0.14.04.1
 ```
 
+## automation: 'spider' - the crawler
+python based crawler..
+
+### usage
+```
+usage: spider.py [-h] [-v LEVEL] TARGET
+
+Given a target host's root, 'spider' searches for basic sql injection
+vulnerabilities and returns the database user and version where successful
+
+positional arguments:
+  TARGET                base url to initialise crawl from
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v LEVEL, --verbose LEVEL
+                        increase the level of information output
+```
+
 ## dependencies
 - docker
 - dvwa

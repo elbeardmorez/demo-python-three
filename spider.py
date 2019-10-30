@@ -144,8 +144,13 @@ async def crawl(root):
 
 async def spider():
 
+    description = [
+      "Given a target host's root, 'spider' searches basic sql "
+      "injection vulnerabilities and returns the database user "
+      "and version where successful"
+    ]
     parser = argparse.ArgumentParser(
-        description='A spider that crawles')
+        description=''.join(description))
     parser.add_argument(
         'target', metavar='TARGET', type=str,
         help="base url to initialise crawl from")
