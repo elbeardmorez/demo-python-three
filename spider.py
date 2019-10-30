@@ -15,14 +15,14 @@ def dump_response(response, level=1):
     if level == 0:
         return
     if level >= 1:
-    print("headers:")
-    for (k, v) in response.headers.get_all():
-        print(f"{k}: {v}")
+        print("headers:")
+        for (k, v) in response.headers.get_all():
+            print(f"{k}: {v}")
         debug("cookies:")
-    print('\n'.join(response.headers.get_list('set-cookie')))
+        print('\n'.join(response.headers.get_list('set-cookie')))
     if level >= 2:
         debug("body:")
-    print(response.body.decode())
+        print(response.body.decode())
 
 
 async def crawl(root):
