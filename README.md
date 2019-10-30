@@ -92,3 +92,8 @@ optional arguments:
 ## dependencies
 - docker
 - dvwa
+- tornado
+- pycurl
+- libcurl
+- beautifulsoup
+- lxml
