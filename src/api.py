@@ -125,7 +125,7 @@ async def spdr_validate_links(parent, links, state):
 
     # fully qualify
     root = re.search(r'(^[^:]*://[^?]+)(?:[?/]|$)', parent)[1]
-    links = ['/'.join([root.rstrip('/'), link.lstrip('/')])
+    links = [urllib.parse.urljoin(root.rstrip('/'), link.lstrip('/'))
              if link.find("://") == -1
              else link for link in links]
 

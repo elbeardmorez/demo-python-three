@@ -1,3 +1,4 @@
+import urllib
 from .parser import parse
 from .exceptions import FatalException
 import src.utils as utils
@@ -25,8 +26,9 @@ class scraper:
             if response.code == 302:
                 location = response.headers['location']
                 if location.find(self.state.target) == -1:
-                    location = '/'.join([self.state.target.rstrip('/'),
-                                         location.lstrip('/')])
+                    location = urllib.parse.urljoin(
+                        self.state.target.rstrip('/'),
+                        location.lstrip('/'))
                 if location.find('login') > -1:
                     if not await api.spdr_login(location, self.state):
                         raise FatalException("login failure")
