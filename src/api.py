@@ -120,6 +120,9 @@ async def spdr_validate_links(parent, links, state):
                 f"processed: {len(state.url_pools['processed'])}, ")
     utils.trace(state.verbosity, f"validating links:\n{links}")
 
+    # strip url param variants
+    links = [link.split('?')[0] for link in links if link[0] != "?"]
+
     # fully qualify
     root = re.search(r'(^[^:]*://[^?]+)(?:[?/]|$)', parent)[1]
     links = ['/'.join([root.rstrip('/'), link.lstrip('/')])
