@@ -22,20 +22,20 @@ class webclient:
     def __del__(self):
         self.client.close()
 
-    async def pull(self, url):
+    async def pull(self, url, follow=False):
         try:
             return await self.client.fetch(
                 url, headers=self.request_headers,
-                raise_error=False)
+                follow_redirects=follow, raise_error=False)
         except Exception as e:
             raise FatalException(e)
 
-    async def push(self, url, body=None):
+    async def push(self, url, body=None, follow=False):
         try:
             return await self.client.fetch(
                 url, method='POST', body=body,
                 headers=self.request_headers,
-                raise_error=False)
+                follow_redirects=follow, raise_error=False)
         except Exception as e:
             raise FatalException(e)
 

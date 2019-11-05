@@ -30,7 +30,7 @@ async def spdr_login(url_login, state):
     print(f"logging in at '{url_login}'")
 
     scraper_ = scraper.scraper(state)
-    response = await scraper_.pull(url_login)
+    response = await scraper_.pull(url_login, follow=True)
     utils.dump_response(state.verbosity, response)
 
     scraper_.cookies_sync(response.headers)
@@ -50,8 +50,8 @@ async def spdr_login(url_login, state):
             'password': credentials[1],
         }
         body = urllib.parse.urlencode(post_data)
-        response = await scraper_.push(url_login, body)
         utils.dump_response(state.verbosity, response)
+        response = await scraper_.push(url_login, body, follow=True)
         # TODO: deduce login success / failure beyond response code 200
         if response.code == 200:
             return True
