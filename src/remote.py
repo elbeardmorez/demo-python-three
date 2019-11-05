@@ -22,14 +22,21 @@ class webclient:
         self.client.close()
 
     async def pull(self, url):
+        try:
         return await self.client.fetch(
             url, headers=self.request_headers,
-            follow_redirects=False, raise_error=False)
+            raise_error=False)
+        except Exception as e:
+            raise FatalException(e)
 
     async def push(self, url, body=None):
+        try:
         return await self.client.fetch(
             url, method='POST', body=body,
-            headers=self.request_headers, raise_error=False)
+            headers=self.request_headers,
+            raise_error=False)
+        except Exception as e:
+            raise FatalException(e)
 
 
 class next_url_handler(handler):

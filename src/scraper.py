@@ -1,4 +1,5 @@
 from .parser import parse
+from .exceptions import FatalException
 import src.utils as utils
 import src.api as api
 import src.remote as remote
@@ -28,7 +29,7 @@ class scraper:
                                          location.lstrip('/')])
                 if location.find('login') > -1:
                     if not await api.spdr_login(location, self.state):
-                        raise Exception("login failure")
+                        raise FatalException("login failure")
                     api.spdr_security_override(
                         'low', self.request_headers, self.state)
                     response = await self.client.fetch(

@@ -4,6 +4,7 @@ import src.utils as utils
 import src.scraper as scraper
 import src.remote as remote
 from .parser import parse, parse_sql_injection_data
+from .exceptions import FatalException
 
 
 # api
@@ -39,7 +40,7 @@ async def spdr_login(url_login, state):
         token = parse(response.body,
                       "form input[name='user_token']", "value")[0]
     except Exception:
-        raise Exception("failed to parse login for token")
+        raise FatalException("failed to parse login for token")
 
     for credentials in state.credentials:
         post_data = {
