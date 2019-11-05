@@ -1,8 +1,10 @@
 import sys
 import argparse
 import asyncio
+import threading
 from .state import state
 import src.api as api
+import src.remote as remote
 
 
 class runner():
@@ -28,6 +30,9 @@ class runner():
         # bug: failure of optional followed by positional
         # https://bugs.python.org/issue9338
         parser.add_argument(
+            '-s', '--slave', metavar='HOST:PORT', type=str,
+            help="instance slave mode, connecting to master at HOST:POST")
+        parser.add_argument(
             '-v', '--verbosity', metavar='LEVEL',
             default=0, type=int,
             help="increase the level of information output")
@@ -42,14 +47,22 @@ class runner():
         self.state_.target = args.target
         self.state_.verbosity = args.verbosity
 
+        if args.slave:
+            self.state_.mode = "slave"
+            self.state_.service = (*args.slave.split(':'),)
+
     def run(self):
         self.parse_args()
 
         # setup scope expression
         api.spdr_scope(self.state_)
 
-        # add a seed url
-        self.state_.url_pools['unprocessed'].appendleft(self.state_.target)
+        if self.state_.mode == "master":
+            # start tornado web server
+            threading.Thread(target=(lambda _: remote.webserver(self.state_)))
+
+            # add a seed url
+            self.state_.url_pools['unprocessed'].appendleft(self.state_.target)
 
         # run event loop
         loop = asyncio.get_event_loop()

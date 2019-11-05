@@ -2,6 +2,7 @@ import urllib
 import re
 import src.utils as utils
 import src.scraper as scraper
+import src.remote as remote
 from .parser import parse, parse_sql_injection_data
 
 
@@ -12,6 +13,10 @@ def spdr_scope(state):
         state.target = "http://" + state.target
     state.scope = r'https?://' + \
                   re.search(r'//([^/]+)(?:\/|$)', state.target)[1]
+
+
+def spdr_service_address(state):
+    return f"http://{state.service[0]}:{state.service[1]}"
 
 
 async def spdr_login(url_login, state):
@@ -156,10 +161,29 @@ async def spdr_add_links(parent, links, state):
 async def spdr_process_urls(state):
 
     scraper_ = scraper.scraper(state)
-    while len(state.url_pools['unprocessed']) > 0:
-        url = spdr_next_url(state)
-        links = await scraper_.scrape(url)
-        await spdr_add_links(url, links, state)
+    if state.mode == "master":
+        while len(state.url_pools['unprocessed']) > 0:
+            url = spdr_next_url(state)
+            links = await scraper_.scrape(url)
+            await spdr_add_links(url, links, state)
+        print("no work left for master process")
+    else:
+        client = remote.webclient()
+        while True:
+            response = await client.pull(
+                           f"{spdr_service_address(state)}/next_url")
+            if response.code == 200:
+                url = response.decode_argument('url')
+                links = scraper_.scrape(url)
+                body = urllib.parse.urlencode(links)
+                response = await client.push(
+                               f"{spdr_service_address(state)}/add_links",
+                               body)
+                if response.code != 200:
+                    raise Exception("slave: failed to submit work")
+            else:
+                print("slave: no work remaining")
+                break
 
     forms = []
     scraper_ = scraper.scraper(state)

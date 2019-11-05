@@ -20,4 +20,5 @@ class state:
             "unprocessed": Lock(),
         }
         self.credentials = [('admin', 'password')]
+        self.service = ('localhost', 10080)
         self.verbosity = 0

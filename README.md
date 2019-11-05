@@ -75,7 +75,7 @@ python based crawler..
 
 ### usage
 ```
-usage: spider.py [-h] [-v LEVEL] TARGET
+usage: spider.py [-h] [-s HOST:PORT] [-v LEVEL] TARGET
 
 Given a target host's root, 'spider' searches for basic sql injection
 vulnerabilities and returns the database user and version where successful
@@ -85,6 +85,8 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  -s HOST:PORT, --slave HOST:PORT
+                        instance slave mode, connecting to master at HOST:POST
   -v LEVEL, --verbosity LEVEL
                         increase the level of information output
 ```
