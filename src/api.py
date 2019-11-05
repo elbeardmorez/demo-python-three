@@ -132,6 +132,14 @@ async def spdr_validate_links(parent, links, state):
     links = [link for link in links
              if re.search(state.scope, link)]
 
+    # blacklist
+    def blacklisted(link):
+        for s_ in state.blacklist:
+            if link.find(s_) > - 1:
+                return True
+        return False
+    links = list(filter(lambda link: not blacklisted(link), links))
+
     utils.trace(state.verbose, f"validated links:\n{links}")
 
     return links

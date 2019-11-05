@@ -13,6 +13,7 @@ class state:
             "processed": {},
             "vulnerable": [],
         }
+        self.blacklist = ['logout']
         self.mutex = {
             "processed": Lock(),
             "processing": Lock(),
