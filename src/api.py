@@ -139,6 +139,11 @@ async def spdr_validate_links(parent, links, state):
         return False
     links = list(filter(lambda link: not blacklisted(link), links))
 
+    # content type
+    scraper_ = scraper.scraper(state)
+    links = [link for link in links
+             if next(iter(await scraper_.header(link, "content-type")), "").find("html")]
+
     utils.trace(state.verbosity, f"validated links:\n{links}")
 
     return links

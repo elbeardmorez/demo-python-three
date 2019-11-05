@@ -22,6 +22,15 @@ class webclient:
     def __del__(self):
         self.client.close()
 
+    async def header(self, url, name):
+        try:
+            response = await self.client.fetch(
+                url, method='HEAD',
+                headers=self.request_headers, raise_error=False)
+            return response.headers.get_list(name)
+        except Exception as e:
+            raise FatalException(e)
+
     async def pull(self, url, follow=False):
         try:
             return await self.client.fetch(
