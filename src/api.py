@@ -143,7 +143,8 @@ async def spdr_validate_links(parent, links, state):
     # content type
     scraper_ = scraper.scraper(state)
     links = [link for link in links
-             if next(iter(await scraper_.header(link, "content-type")), "").find("html")]
+             if next(iter(await scraper_.header(link, "content-type")),
+                     "").find("html") > -1]
 
     utils.trace(state.verbosity, f"validated links:\n{links}")
 
