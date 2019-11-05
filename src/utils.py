@@ -8,15 +8,15 @@ def trace(verbosity, *args):
 
 
 def dump_response(verbosity, response):
-    if verbosity == 0:
+    if verbosity < 2:
         return
-    if verbosity >= 1:
+    if verbosity >= 2:
         print("headers:")
         for (k, v) in response.headers.get_all():
             print(f"{k}: {v}")
         trace(verbosity, "cookies:")
         print('\n'.join(response.headers.get_list('set-cookie')))
-    if verbosity >= 2:
+    if verbosity >= 3:
         trace(verbosity, "body:")
         print(response.body.decode())
 
