@@ -116,6 +116,19 @@ optional arguments:
 ### architectural design (C4 methodolody)
 ![architectural design](architecture.png)
 
+## todo
+- state implementation
+- restore / reset existing state cmdline and interactive options
+- docstrings
+- test suite
+- track url_pools diffs for state sync
+- crawl link subpaths for isolated (no linked) resources
+- make result deduction template agnostic via pre / post exploit diff to
+extract results from unknown DOM position
+- custom credentials cmdline option
+- support multiple credentials sets
+- parse robots.txt for valid paths, etiquette abuse
+
 ## dependencies
 - docker
 - dvwa
