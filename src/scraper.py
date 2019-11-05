@@ -1,34 +1,24 @@
-from tornado import httpclient, httputil
 from .parser import parse
 import src.utils as utils
 import src.api as api
+import src.remote as remote
 
 
 class scraper:
-    class __scraper():
+    class __scraper(remote.webclient):
         state = None
         client = None
-        request_headers = None
 
         def __init__(self, state):
+            # super(__scraper, self).__init__()
+            remote.webclient.__init__(self)
             self.state = state
-            httpclient.AsyncHTTPClient.configure(
-                "tornado.curl_httpclient.CurlAsyncHTTPClient")
-            self.client = httpclient.AsyncHTTPClient(force_instance=True)
-
-            self.request_headers = httputil.HTTPHeaders()
-            self.request_headers.add("Keep-Alive", "timeout=5, max=100")
-            self.request_headers.add("Connection", "Keep-Alive")
-            self.request_headers.add("DNT", "1")
-            self.request_headers.add("Upgrade-Insecure-Requests", "1")
 
         async def scrape(self, url):
 
             utils.trace(self.state.verbosity, f"scraping: '{url}'")
 
-            response = await self.client.fetch(
-                          url, headers=self.request_headers,
-                          follow_redirects=False, raise_error=False)
+            response = await self.pull(url)
             utils.dump_response(self.state.verbosity, response)
 
             if response.code == 302:

@@ -24,9 +24,7 @@ async def spdr_login(url_login, state):
     print(f"logging in at '{url_login}'")
 
     scraper_ = scraper.scraper(state)
-    response = await scraper_.client.fetch(
-                   url_login, headers=scraper_.request_headers,
-                   raise_error=False)
+    response = await scraper_.pull(url_login)
     utils.dump_response(state.verbosity, response)
 
     scraper_.cookies_sync(response.headers)
@@ -46,10 +44,7 @@ async def spdr_login(url_login, state):
             'password': credentials[1],
         }
         body = urllib.parse.urlencode(post_data)
-        response = await scraper_.client.fetch(
-                       url_login, method='POST',
-                       headers=scraper_.request_headers,
-                       body=body)
+        response = await scraper_.push(url_login, body)
         utils.dump_response(state.verbosity, response)
         # TODO: deduce login success / failure beyond response code 200
         if response.code == 200:
@@ -80,10 +75,7 @@ async def spdr_inject(url, state):
         'Submit': "Submit",
     }
     body = urllib.parse.urlencode(post_data)
-    response = await scraper_.client.fetch(
-                   url, method='POST',
-                   headers=scraper_.request_headers,
-                   body=body)
+    response = await scraper_.push(url, body)
     utils.dump_response(state.verbosity, response)
 
     result_ = None
@@ -173,9 +165,7 @@ async def spdr_process_urls(state):
     scraper_ = scraper.scraper(state)
     if len(state.url_pools['processed']) > 0:
         for url in state.url_pools['processed']:
-            response = await scraper_.client.fetch(
-                url, headers=scraper_.request_headers,
-                raise_error=False)
+            response = await scraper_.pull(url)
             utils.dump_response(state.verbosity, response)
             if len(parse(response.body, 'form')) > 0:
                 forms.append(url)
