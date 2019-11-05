@@ -20,4 +20,4 @@ class state:
             "unprocessed": Lock(),
         }
         self.credentials = [('admin', 'password')]
-        self.verbose = 0
+        self.verbosity = 0

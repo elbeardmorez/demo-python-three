@@ -24,12 +24,12 @@ class scraper:
 
         async def scrape(self, url):
 
-            utils.trace(self.state.verbose, f"scraping: '{url}'")
+            utils.trace(self.state.verbosity, f"scraping: '{url}'")
 
             response = await self.client.fetch(
                           url, headers=self.request_headers,
                           follow_redirects=False, raise_error=False)
-            utils.dump_response(self.state.verbose, response)
+            utils.dump_response(self.state.verbosity, response)
 
             if response.code == 302:
                 location = response.headers['location']
@@ -52,8 +52,8 @@ class scraper:
 
         def cookies_sync(self, headers):
             utils.cookies_update(headers, self.request_headers)
-            utils.trace(self.state.verbose, "updated cookies:")
-            utils.trace(self.state.verbose,
+            utils.trace(self.state.verbosity, "updated cookies:")
+            utils.trace(self.state.verbosity,
                         '\n'.join(headers.get_list('cookie')))
 
     instance = None

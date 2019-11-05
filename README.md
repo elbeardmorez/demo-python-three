@@ -85,7 +85,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -v LEVEL, --verbose LEVEL
+  -v LEVEL, --verbosity LEVEL
                         increase the level of information output
 ```
 

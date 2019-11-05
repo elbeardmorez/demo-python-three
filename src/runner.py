@@ -28,7 +28,7 @@ class runner():
         # bug: failure of optional followed by positional
         # https://bugs.python.org/issue9338
         parser.add_argument(
-            '-v', '--verbose', metavar='LEVEL',
+            '-v', '--verbosity', metavar='LEVEL',
             default=0, type=int,
             help="increase the level of information output")
 
@@ -40,7 +40,7 @@ class runner():
         args = parser.parse_args()
 
         self.state_.target = args.target
-        self.state_.verbose = args.verbose
+        self.state_.verbosity = args.verbosity
 
     def run(self):
         self.parse_args()

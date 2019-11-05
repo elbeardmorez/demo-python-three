@@ -27,7 +27,7 @@ async def spdr_login(url_login, state):
     response = await scraper_.client.fetch(
                    url_login, headers=scraper_.request_headers,
                    raise_error=False)
-    utils.dump_response(state.verbose, response)
+    utils.dump_response(state.verbosity, response)
 
     scraper_.cookies_sync(response.headers)
 
@@ -50,7 +50,7 @@ async def spdr_login(url_login, state):
                        url_login, method='POST',
                        headers=scraper_.request_headers,
                        body=body)
-        utils.dump_response(state.verbose, response)
+        utils.dump_response(state.verbosity, response)
         # TODO: deduce login success / failure beyond response code 200
         if response.code == 200:
             return True
@@ -62,14 +62,15 @@ def spdr_security_override(level, headers, state):
 
     # override security cookie
     res = utils.cookies_override(headers, "security", level)
-    utils.trace(state.verbose, f"{'overrode' if res == 'updated' else 'set'}" +
-                               " security cookie:")
-    utils.trace(state.verbose, '\n'.join(headers.get_list('cookie')))
+    utils.trace(state.verbosity,
+                f"{'overrode' if res == 'updated' else 'set'}" +
+                " security cookie:")
+    utils.trace(state.verbosity, '\n'.join(headers.get_list('cookie')))
 
 
 async def spdr_inject(url, state):
     # test for sql-injection vulnerability
-    utils.trace(state.verbose,
+    utils.trace(state.verbosity,
                 f"testing for sql-injection vulnerability on form at '{url}'")
 
     # attempt injection
@@ -83,7 +84,7 @@ async def spdr_inject(url, state):
                    url, method='POST',
                    headers=scraper_.request_headers,
                    body=body)
-    utils.dump_response(state.verbose, response)
+    utils.dump_response(state.verbosity, response)
 
     result_ = None
     try:
@@ -111,11 +112,11 @@ async def spdr_validate_links(parent, links, state):
     if state.mode != "master":
         raise Exception("invalid mode")
 
-    utils.trace(state.verbose,
+    utils.trace(state.verbosity,
                 f"unprocessed: {len(state.url_pools['unprocessed'])}, " +
                 f"processing: {len(state.url_pools['processing'])}, " +
                 f"processed: {len(state.url_pools['processed'])}, ")
-    utils.trace(state.verbose, f"validating links:\n{links}")
+    utils.trace(state.verbosity, f"validating links:\n{links}")
 
     # fully qualify
     root = re.search(r'(^[^:]*://[^/]+(?:\/|$))', parent)[1]
@@ -140,7 +141,7 @@ async def spdr_validate_links(parent, links, state):
         return False
     links = list(filter(lambda link: not blacklisted(link), links))
 
-    utils.trace(state.verbose, f"validated links:\n{links}")
+    utils.trace(state.verbosity, f"validated links:\n{links}")
 
     return links
 
@@ -175,7 +176,7 @@ async def spdr_process_urls(state):
             response = await scraper_.client.fetch(
                 url, headers=scraper_.request_headers,
                 raise_error=False)
-            utils.dump_response(state.verbose, response)
+            utils.dump_response(state.verbosity, response)
             if len(parse(response.body, 'form')) > 0:
                 forms.append(url)
 
