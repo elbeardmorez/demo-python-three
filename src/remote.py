@@ -2,6 +2,7 @@ import tornado
 from tornado import httpclient, httputil
 from tornado.web import Application as httpserver, RequestHandler as handler
 import src.api as api
+from .exceptions import FatalException
 
 
 class webclient:
@@ -23,18 +24,18 @@ class webclient:
 
     async def pull(self, url):
         try:
-        return await self.client.fetch(
-            url, headers=self.request_headers,
-            raise_error=False)
+            return await self.client.fetch(
+                url, headers=self.request_headers,
+                raise_error=False)
         except Exception as e:
             raise FatalException(e)
 
     async def push(self, url, body=None):
         try:
-        return await self.client.fetch(
-            url, method='POST', body=body,
-            headers=self.request_headers,
-            raise_error=False)
+            return await self.client.fetch(
+                url, method='POST', body=body,
+                headers=self.request_headers,
+                raise_error=False)
         except Exception as e:
             raise FatalException(e)
 

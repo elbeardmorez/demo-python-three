@@ -181,7 +181,7 @@ async def spdr_process_urls(state):
                                f"{spdr_service_address(state)}/add_links",
                                body)
                 if response.code != 200:
-                    raise Exception("slave: failed to submit work")
+                    raise FatalException("slave: failed to submit work")
             else:
                 print("slave: no work remaining")
                 break
