@@ -3,7 +3,9 @@ import argparse
 import asyncio
 import threading
 from .state import state
+from .storage import storage
 import src.api as api
+import src.utils as utils
 import src.remote as remote
 
 
@@ -56,6 +58,11 @@ class runner():
 
         # setup scope expression
         api.spdr_scope(self.state_)
+
+        # test storage
+        storage_ = storage(self.state_)
+        if not storage_.connected():
+            utils.trace("stateless mode")
 
         if self.state_.mode == "master":
             # start tornado web server

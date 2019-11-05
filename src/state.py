@@ -21,4 +21,7 @@ class state:
         }
         self.credentials = [('admin', 'password')]
         self.service = ('localhost', 10080)
+        self.storage = ('localhost', 27017)
+        self.modified = 0
+        self.sync_threshold = 10
         self.verbosity = 0

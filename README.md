@@ -156,3 +156,5 @@ extract results from unknown DOM position
 - libcurl
 - beautifulsoup
 - lxml
+- mongodb
+- pymongo

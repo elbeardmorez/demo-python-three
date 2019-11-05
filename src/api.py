@@ -101,11 +101,15 @@ def spdr_next_url(state):
     while len(state.url_pools['unprocessed']) > 0:
         with state.mutex['unprocessed']:
             next_ = state.url_pools['unprocessed'].popleft()
+            state.modified += 1
         if next_ not in state.url_pools['processed'] and \
            next_ not in state.url_pools['processing']:
             with state.mutex['processing']:
                 state.url_pools['processing'][next_] = 1
+                state.modified += 1
             break
+        if state.modified >= state.sync_threshold:
+            spdr_storage_sync(state)
 
     return next_
 
@@ -164,12 +168,19 @@ async def spdr_add_links(parent, links, state):
         # finished processing parent url
         with state.mutex['processing']:
             del state.url_pools['processing'][parent]
+        state.modified += 1
         with state.mutex['processed']:
             state.url_pools['processed'][parent] = 1
+        state.modified += 1
 
     links = await spdr_validate_links(parent, links, state)
     with state.mutex['unprocessed']:
         state.url_pools['unprocessed'].extend(links)
+
+    if state.modified + len(links) + 1 >= state.sync_threshold:
+        spdr_storage_sync(state)
+    else:
+        state.modified += len(links) + 1
 
 
 async def spdr_process_urls(state):
@@ -217,3 +228,9 @@ async def spdr_process_urls(state):
             result_ = await spdr_inject(url, state)
             if result_:
                 state.url_pools['vulnerable'].append(result_)
+
+
+def spdr_storage_sync(state):
+    # state.storage.upsert(state.storage.added)
+    # state.storage.remove(state.storage.removed)
+    state.modified = 0
