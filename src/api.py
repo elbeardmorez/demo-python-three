@@ -118,7 +118,7 @@ async def spdr_validate_links(parent, links, state):
     utils.trace(state.verbosity, f"validating links:\n{links}")
 
     # fully qualify
-    root = re.search(r'(^[^:]*://[^/]+(?:\/|$))', parent)[1]
+    root = re.search(r'(^[^:]*://[^?]+)(?:[?/]|$)', parent)[1]
     links = ['/'.join([root.rstrip('/'), link.lstrip('/')])
              if link.find("://") == -1
              else link for link in links]
