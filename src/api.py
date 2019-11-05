@@ -89,7 +89,7 @@ async def spdr_inject(url, state):
     try:
         data = parse_sql_injection_data(response.body, "pre", "name")
         if len(data) > 0:
-            result_ = f"{url} | version: data[0], user: data[1]"
+            result_ = f"{url} | version: {data[0]}, user: {data[1]}"
     except Exception:
         pass
 
