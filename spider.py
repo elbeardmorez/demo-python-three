@@ -10,7 +10,7 @@ if __name__ == "__main__":
             if l_results > 0:
                 print(f"# {l_results} sql injection vulnerabilit" +
                       f"{'y' if l_results == 1 else 'ies'} identified at:")
-                print('\n'.join(results))
+                print('\n'.join([str(result) for result in results]))
             else:
                 print("no sql injection vulnerabilities identified")
             break
