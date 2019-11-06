@@ -91,6 +91,18 @@ optional arguments:
                         increase the level of information output
 ```
 
+### example
+```
+> python ./spider.py localhost
+
+[info] logging in at 'http://localhost/login.php'
+[info] crawled site 'http://localhost' and found 12 urls with forms to test
+[info] 1 sql injection vulnerability identified at:
+url: 'http://localhost/vulnerabilities/sqli/'
+data: 'version|5.5.47-0ubuntu0.14.04.1, user|admin@localhost'
+```
+
+
 ### architectual framework components
 #### user input
 - provide target / root
@@ -117,6 +129,11 @@ optional arguments:
 
 ### architectural design (C4 methodolody)
 ![architectural design](architecture.png)
+
+## testing
+```
+> python src/tests.py
+```
 
 ## todo
 - state implementation
