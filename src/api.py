@@ -28,7 +28,7 @@ async def spdr_login(url_login, state):
     # parse login for credentials
     # ensure php session id
 
-    print(f"logging in at '{url_login}'")
+    print(f"[info] logging in at '{url_login}'")
 
     scraper_ = scraper.scraper(state)
     response = await scraper_.pull(url_login, follow=True)
@@ -180,7 +180,7 @@ async def spdr_process_urls(state):
             url = spdr_next_url(state)
             links = await scraper_.scrape(url)
             await spdr_add_links(url, links, state)
-        print("no work left for master process")
+        utils.trace(state.verbosity, "no work remaining for master process")
     else:
         client = remote.webclient()
         while True:
@@ -196,7 +196,7 @@ async def spdr_process_urls(state):
                 if response.code != 200:
                     raise FatalException("slave: failed to submit work")
             else:
-                print("slave: no work remaining")
+                utils.trace(state.verbosity, "no work remaining for slave process")
                 break
 
     forms = []
@@ -208,7 +208,7 @@ async def spdr_process_urls(state):
             if len(parse(response.body, 'form')) > 0:
                 forms.append(url)
 
-    print(f"crawled site '{state.target}' and found {len(forms)} " +
+    print(f"[info] crawled site '{state.target}' and found {len(forms)} " +
           f"url{'s' if len(forms) != 1 else ''} with forms to test")
 
     if len(forms) > 0:
