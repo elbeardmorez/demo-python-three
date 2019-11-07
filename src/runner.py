@@ -76,7 +76,8 @@ class runner():
 
         if self.state_.mode == "master":
             # start tornado web server
-            threading.Thread(target=(lambda _: remote.webserver(self.state_)))
+            threading.Thread(
+                target=(lambda: remote.webserver(self.state_))).start()
 
             # add a seed url
             self.state_.url_pools['unprocessed'].appendleft(self.state_.target)
