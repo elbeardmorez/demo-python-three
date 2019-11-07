@@ -75,7 +75,7 @@ python based crawler..
 
 ### usage
 ```
-usage: spider.py [-h] [-s] [-p PORT] [-v LEVEL] TARGET
+usage: spider.py [-h] [-s] [-p PORT] [-dr DELAY] [-v LEVEL] TARGET
 
 Given a target host's root, 'spider' searches for basic sql injection
 vulnerabilities and returns the database user and version where successful
@@ -90,6 +90,8 @@ optional arguments:
                         'TARGET:10080'
   -p PORT, --port PORT  override the default port for listening (master mode),
                         or connecting (slave mode)
+  -dr DELAY, --delay-requests DELAY
+                        add a delay (ms) to the processing of each url
   -v LEVEL, --verbosity LEVEL
                         increase the level of information output
 ```

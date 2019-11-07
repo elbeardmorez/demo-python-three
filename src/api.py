@@ -1,5 +1,6 @@
 import urllib
 import re
+import time
 import src.scraper as scraper
 import src.remote as remote
 from .utils import trace, dump_response, cookies_override
@@ -175,6 +176,8 @@ async def spdr_process_urls(state):
     if state.mode == "master":
         while len(state.url_pools['unprocessed']) > 0:
             url = spdr_next_url(state)
+            if state.delay_requests > 0:
+                time.sleep(state.delay_requests / 1000)
             links = await scraper_.scrape(url)
             await spdr_add_links(url, links, state)
         trace(2, "no work remaining for master process")
@@ -184,6 +187,8 @@ async def spdr_process_urls(state):
             response = await client.pull(
                            f"{spdr_service_address(state)}/next_url")
             if response.code == 200:
+                if state.delay_requests > 0:
+                    time.sleep(state.delay_requests / 1000)
                 url = response.decode_argument('url')
                 links = scraper_.scrape(url)
                 body = urllib.parse.urlencode(links)

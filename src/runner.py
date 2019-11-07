@@ -40,6 +40,10 @@ class runner():
             help="override the default port for listening (master mode), " +
                  "or connecting (slave mode)")
         parser.add_argument(
+            '-dr', '--delay-requests', metavar='DELAY',
+            type=int, default=0,
+            help="add a delay (ms) to the processing of each url")
+        parser.add_argument(
             '-v', '--verbosity', metavar='LEVEL',
             default=0, type=int,
             help="increase the level of information output")
@@ -53,6 +57,7 @@ class runner():
 
         self.state_.target = args.target
         self.state_.verbosity = args.verbosity
+        self.state_.delay_requests = args.delay_requests
 
         if args.slave:
             self.state_.mode = "slave"
