@@ -3,6 +3,7 @@ from threading import Lock
 
 
 class state:
+    class __state:
     def __init__(self):
         self.mode = "master"
         self.target = ""
@@ -22,3 +23,15 @@ class state:
         self.credentials = [('admin', 'password')]
         self.service = ('localhost', 10080)
         self.verbosity = 0
+
+    instance = None
+
+    def __init__(self):
+        if not state.instance:
+            state.instance = state.__state()
+
+    def __getattr__(self, name):
+        return getattr(self.instance, name)
+
+    def __setattr__(self, name, value):
+        return setattr(self.instance, name, value)
