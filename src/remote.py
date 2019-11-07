@@ -1,8 +1,10 @@
+import json
 import tornado
 from tornado import httpclient, httputil
 from tornado.web import Application as httpserver, RequestHandler as handler
 import src.api as api
 from .exceptions import FatalException
+from .utils import trace
 
 
 class webclient:
@@ -57,6 +59,7 @@ class next_url_handler(handler):
         next_ = api.spdr_next_url(self.state)
         if next_:
             self.set_status(200)
+            trace(2, f"pushing url '{next_}' to slave")
             self.finish({'url': next_})
         else:
             self.set_status(500)
@@ -67,9 +70,12 @@ class add_links_handler(handler):
     def initialize(self, state):
         self.state = state
 
-    def post(self):
-        url = self.decode_argument('url')
-        links = self.decode_argument('links')
+    async def post(self):
+        data = json.loads(self.request.body)
+        url = data['url']
+        links = data['links']
+        trace(2, f"received {len(links)} scraped link" +
+              f"{'s' if len(links) != 0 else ''} from slave")
         api.spdr_add_links(url, links, self.state)
         self.set_status(200)
         self.finish()
@@ -81,7 +87,9 @@ class webserver:
     loop = None
 
     def __init__(self, state):
+        trace(2, "starting server for master instance")
         self.state = state
+        loop = tornado.ioloop.IOLoop(make_current=True)
         httpclient.AsyncHTTPClient.configure(
             "tornado.curl_httpclient.CurlAsyncHTTPClient")
         self.client = httpclient.AsyncHTTPClient(force_instance=True)
@@ -91,7 +99,6 @@ class webserver:
             ('/add_links', add_links_handler, {'state': self.state})
         ])
         self.server.listen(self.state.service[1])
-        loop = tornado.ioloop.IOLoop(make_current=False)
         loop.start()
 
     def __del__(self):

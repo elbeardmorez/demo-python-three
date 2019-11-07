@@ -95,4 +95,12 @@ class runner():
             if not loop.is_closed():
                 loop.close()
 
-        return self.state_.url_pools['vulnerable']
+        if self.state_.mode == "master":
+            results = self.state_.url_pools['vulnerable']
+            l_results = len(results)
+            if l_results > 0:
+                trace(0, f"{l_results} sql injection vulnerabilit" +
+                      f"{'y' if l_results == 1 else 'ies'} identified at:")
+                print('\n'.join([str(result) for result in results]))
+            else:
+                trace(0, "no sql injection vulnerabilities identified")

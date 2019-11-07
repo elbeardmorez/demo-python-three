@@ -1,6 +1,7 @@
 import urllib
 import re
 import time
+import json
 import src.scraper as scraper
 import src.remote as remote
 from .utils import trace, dump_response, cookies_override
@@ -184,14 +185,16 @@ async def spdr_process_urls(state):
     else:
         client = remote.webclient()
         while True:
+            trace(2, "slave: requesting next url")
             response = await client.pull(
                            f"{spdr_service_address(state)}/next_url")
             if response.code == 200:
                 if state.delay_requests > 0:
                     time.sleep(state.delay_requests / 1000)
-                url = response.decode_argument('url')
-                links = scraper_.scrape(url)
-                body = urllib.parse.urlencode(links)
+                url = json.loads(response.body)['url']
+                links = await scraper_.scrape(url)
+                body = json.dumps({'url': url, 'links': links})
+                trace(2, "slave: pushing scraped links")
                 response = await client.push(
                                f"{spdr_service_address(state)}/add_links",
                                body)
@@ -200,6 +203,7 @@ async def spdr_process_urls(state):
             else:
                 trace(2, "no work remaining for slave process")
                 break
+        return
 
     forms = []
     scraper_ = scraper.scraper(state)
