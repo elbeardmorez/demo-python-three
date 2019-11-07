@@ -75,18 +75,21 @@ python based crawler..
 
 ### usage
 ```
-usage: spider.py [-h] [-s HOST:PORT] [-v LEVEL] TARGET
+usage: spider.py [-h] [-s] [-p PORT] [-v LEVEL] TARGET
 
 Given a target host's root, 'spider' searches for basic sql injection
 vulnerabilities and returns the database user and version where successful
 
 positional arguments:
-  TARGET                base url to initialise crawl from
+  TARGET                (master mode) base url to initialise crawl from |
+                        (slave mode) host address of master to work for
 
 optional arguments:
   -h, --help            show this help message and exit
-  -s HOST:PORT, --slave HOST:PORT
-                        instance slave mode, connecting to master at HOST:POST
+  -s, --slave           run in slave mode, connecting to master at
+                        'TARGET:10080'
+  -p PORT, --port PORT  override the default port for listening (master mode),
+                        or connecting (slave mode)
   -v LEVEL, --verbosity LEVEL
                         increase the level of information output
 ```

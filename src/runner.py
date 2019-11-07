@@ -27,12 +27,18 @@ class runner():
             description=''.join(description))
         parser.add_argument(
             'target', metavar='TARGET', type=str,
-            help="base url to initialise crawl from")
+            help="(master mode) base url to initialise crawl from  | " +
+                 "(slave mode) host address of master to work for")
         # bug: failure of optional followed by positional
         # https://bugs.python.org/issue9338
         parser.add_argument(
-            '-s', '--slave', metavar='HOST:PORT', type=str,
-            help="instance slave mode, connecting to master at HOST:POST")
+            '-s', '--slave', action="store_const",
+            const=True, default=False,
+            help="run in slave mode, connecting to master at 'TARGET:10080'")
+        parser.add_argument(
+            '-p', '--port', metavar='PORT', type=str,
+            help="override the default port for listening (master mode), " +
+                 "or connecting (slave mode)")
         parser.add_argument(
             '-v', '--verbosity', metavar='LEVEL',
             default=0, type=int,
@@ -50,10 +56,20 @@ class runner():
 
         if args.slave:
             self.state_.mode = "slave"
-            self.state_.service = (*args.slave.split(':'),)
+            self.state_.service[0] = args.target
+
+        if args.port:
+            self.state_.service[1] = args.port
 
     def run(self):
         self.parse_args()
+
+        if self.state_.mode == "master":
+            trace(0, f"running in master mode, targetting " +
+                     f"'{self.state_.target}'")
+        else:
+            trace(0, f"running in slave mode, connecting at " +
+                     f"'{api.spdr_service_address(self.state_)}'")
 
         # setup scope expression
         api.spdr_scope(self.state_)
