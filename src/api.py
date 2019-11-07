@@ -1,8 +1,8 @@
 import urllib
 import re
-import src.utils as utils
 import src.scraper as scraper
 import src.remote as remote
+from .utils import trace, dump_response, cookies_override
 from .parser import parse, parse_sql_injection_data
 from .result import result
 from .exceptions import FatalException
@@ -28,11 +28,11 @@ async def spdr_login(url_login, state):
     # parse login for credentials
     # ensure php session id
 
-    print(f"[info] logging in at '{url_login}'")
+    trace(0, f"logging in at '{url_login}'")
 
     scraper_ = scraper.scraper(state)
     response = await scraper_.pull(url_login, follow=True)
-    utils.dump_response(state.verbosity, response)
+    dump_response(response)
 
     scraper_.cookies_sync(response.headers)
 
@@ -51,7 +51,7 @@ async def spdr_login(url_login, state):
             'password': credentials[1],
         }
         body = urllib.parse.urlencode(post_data)
-        utils.dump_response(state.verbosity, response)
+        dump_response(response)
         response = await scraper_.push(url_login, body, follow=True)
         # TODO: deduce login success / failure beyond response code 200
         if response.code == 200:
@@ -63,17 +63,14 @@ async def spdr_login(url_login, state):
 def spdr_security_override(level, headers, state):
 
     # override security cookie
-    res = utils.cookies_override(headers, "security", level)
-    utils.trace(state.verbosity,
-                f"{'overrode' if res == 'updated' else 'set'}" +
-                " security cookie:")
-    utils.trace(state.verbosity, '\n'.join(headers.get_list('cookie')))
+    res = cookies_override(headers, "security", level)
+    trace(2, f"{'overrode' if res == 'updated' else 'set'} security cookie:")
+    trace(2, '\n'.join(headers.get_list('cookie')))
 
 
 async def spdr_inject(url, state):
     # test for sql-injection vulnerability
-    utils.trace(state.verbosity,
-                f"testing for sql-injection vulnerability on form at '{url}'")
+    trace(1, f"testing for sql-injection vulnerability on form at '{url}'")
 
     # attempt injection
     scraper_ = scraper.scraper(state)
@@ -83,7 +80,7 @@ async def spdr_inject(url, state):
     }
     body = urllib.parse.urlencode(post_data)
     response = await scraper_.push(url, body)
-    utils.dump_response(state.verbosity, response)
+    dump_response(response)
 
     result_ = None
     try:
@@ -114,11 +111,11 @@ async def spdr_validate_links(parent, links, state):
     if state.mode != "master":
         raise Exception("invalid mode")
 
-    utils.trace(state.verbosity,
-                f"unprocessed: {len(state.url_pools['unprocessed'])}, " +
-                f"processing: {len(state.url_pools['processing'])}, " +
-                f"processed: {len(state.url_pools['processed'])}, ")
-    utils.trace(state.verbosity, f"validating links:\n{links}")
+    trace(3, f"unprocessed: {len(state.url_pools['unprocessed'])}, " +
+             f"processing: {len(state.url_pools['processing'])}, " +
+             f"processed: {len(state.url_pools['processed'])}, ")
+
+    trace(4, f"validating links:\n{links}")
 
     # strip url param variants
     links = [link.split('?')[0] for link in links if link[0] != "?"]
@@ -152,7 +149,7 @@ async def spdr_validate_links(parent, links, state):
              if next(iter(await scraper_.header(link, "content-type")),
                      "").find("html") > -1]
 
-    utils.trace(state.verbosity, f"validated links:\n{links}")
+    trace(4, f"validated links:\n{links}")
 
     return links
 
@@ -180,7 +177,7 @@ async def spdr_process_urls(state):
             url = spdr_next_url(state)
             links = await scraper_.scrape(url)
             await spdr_add_links(url, links, state)
-        utils.trace(state.verbosity, "no work remaining for master process")
+        trace(2, "no work remaining for master process")
     else:
         client = remote.webclient()
         while True:
@@ -196,7 +193,7 @@ async def spdr_process_urls(state):
                 if response.code != 200:
                     raise FatalException("slave: failed to submit work")
             else:
-                utils.trace(state.verbosity, "no work remaining for slave process")
+                trace(2, "no work remaining for slave process")
                 break
 
     forms = []
@@ -204,11 +201,11 @@ async def spdr_process_urls(state):
     if len(state.url_pools['processed']) > 0:
         for url in state.url_pools['processed']:
             response = await scraper_.pull(url)
-            utils.dump_response(state.verbosity, response)
+            dump_response(response)
             if len(parse(response.body, 'form')) > 0:
                 forms.append(url)
 
-    print(f"[info] crawled site '{state.target}' and found {len(forms)} " +
+    trace(0, f"crawled site '{state.target}' and found {len(forms)} " +
           f"url{'s' if len(forms) != 1 else ''} with forms to test")
 
     if len(forms) > 0:

@@ -3,6 +3,7 @@ import argparse
 import asyncio
 import threading
 from .state import state
+from .utils import trace
 import src.api as api
 import src.remote as remote
 
@@ -39,7 +40,7 @@ class runner():
 
         if not sys.argv[1:]:
             parser.print_help(sys.stderr)
-            print(f"\nmissing args!")
+            trace(-1, f"\nmissing args!")
             exit(0)
 
         args = parser.parse_args()

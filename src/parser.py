@@ -1,11 +1,12 @@
 from bs4 import BeautifulSoup as Soup
+from .utils import trace
 
 
 def parse(body, selector, field=None):
     try:
         dom = Soup(body.decode(), 'lxml')
     except Exception:
-        print("ignoring unparsable content")
+        trace(1, "ignoring unparsable content")
         return []
     tokens = dom.select(selector)
     return tokens if not field \

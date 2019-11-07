@@ -1,23 +1,28 @@
 from collections import OrderedDict
 import re
+from .state import state
 
 
-def trace(verbosity, *args):
-    if verbosity > 0:
-        print("[debug]", *args)
+def trace(minimum_verbosity, *args):
+    state_ = state()
+    type_ = 'info' if minimum_verbosity == 0 \
+            else ('debug' if minimum_verbosity > 0 else 'error')
+    if state_.verbosity >= minimum_verbosity:
+        print(f"[{type_}]", *args)
 
 
-def dump_response(verbosity, response):
-    if verbosity < 2:
+def dump_response(response):
+    state_ = state()
+    if state_.verbosity < 5:
         return
-    if verbosity >= 2:
+    if state_.verbosity >= 5:
         print("headers:")
         for (k, v) in response.headers.get_all():
             print(f"{k}: {v}")
-        trace(verbosity, "cookies:")
+        print("cookies:")
         print('\n'.join(response.headers.get_list('set-cookie')))
-    if verbosity >= 3:
-        trace(verbosity, "body:")
+    if state_.verbosity >= 6:
+        print("body:")
         print(response.body.decode())
 
 

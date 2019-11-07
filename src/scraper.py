@@ -1,7 +1,7 @@
 import urllib
 from .parser import parse
 from .exceptions import FatalException
-import src.utils as utils
+from .utils import trace, dump_response, cookies_update
 import src.api as api
 import src.remote as remote
 
@@ -18,10 +18,10 @@ class scraper:
 
         async def scrape(self, url):
 
-            utils.trace(self.state.verbosity, f"scraping: '{url}'")
+            trace(1, f"scraping: '{url}'")
 
             response = await self.pull(url)
-            utils.dump_response(self.state.verbosity, response)
+            dump_response(response)
 
             if response.code == 302:
                 location = response.headers['location']
@@ -44,10 +44,9 @@ class scraper:
             return parse(response.body, 'a', 'href')
 
         def cookies_sync(self, headers):
-            utils.cookies_update(headers, self.request_headers)
-            utils.trace(self.state.verbosity, "updated cookies:")
-            utils.trace(self.state.verbosity,
-                        '\n'.join(headers.get_list('cookie')))
+            cookies_update(headers, self.request_headers)
+            trace(2, "updated cookies:")
+            trace(2, '\n'.join(headers.get_list('cookie')))
 
     instance = None
 
