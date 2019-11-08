@@ -97,6 +97,7 @@ optional arguments:
 ```
 
 ### example
+##### simple
 ```
 > python ./spider.py localhost
 
@@ -106,7 +107,73 @@ optional arguments:
 url: 'http://localhost/vulnerabilities/sqli/'
 data: 'version|5.5.47-0ubuntu0.14.04.1, user|admin@localhost'
 ```
+##### master / slave
+```
+master
 
+> python ../spider.py --verbosity 2 --delay-requests 500 localhost
+[info] running in master mode, targetting 'localhost'
+[debug] starting server for master instance
+[debug] scraping: 'http://localhost'
+[info] logging in at 'http://localhost/login.php'
+[debug] updated cookies:
+[debug]
+[debug] overrode security cookie:
+[debug] PHPSESSID=23at8ll9t3cai2hmplpoh39o42; path=/; httponly; security=low
+[debug] scraping: 'http://localhost/'
+[debug] scraping: 'http://localhost/instructions.php'
+[debug] pushing url 'http://localhost/vulnerabilities/brute/' to slave
+[debug] scraping: 'http://localhost/setup.php'
+[debug] scraping: 'http://localhost/vulnerabilities/exec/'
+[debug] received 20 scraped links from slave
+[debug] pushing url 'http://localhost/vulnerabilities/fi/' to slave
+[debug] scraping: 'http://localhost/vulnerabilities/csrf/'
+[debug] scraping: 'http://localhost/vulnerabilities/upload/'
+[debug] received 1 scraped links from slave
+[debug] pushing url 'http://localhost/vulnerabilities/sqli/' to slave
+[debug] scraping: 'http://localhost/vulnerabilities/captcha/'
+[debug] received 23 scraped links from slave
+[debug] scraping: 'http://localhost/vulnerabilities/sqli_blind/'
+[debug] pushing url 'http://localhost/vulnerabilities/xss_r/' to slave
+[debug] scraping: 'http://localhost/vulnerabilities/xss_s/'
+[debug] received 22 scraped links from slave
+[debug] pushing url 'http://localhost/phpinfo.php' to slave
+[debug] scraping: 'http://localhost/security.php'
+[debug] scraping: 'http://localhost/about.php'
+[debug] scraping: 'http://localhost/ids_log.php'
+[debug] no work remaining for master process
+[debug] 1 item remaining in the 'processing' queue due to slave workers, waiting..
+[debug] received 2 scraped links from slave
+[info] crawled site 'http://localhost' and found 12 urls with forms to test
+[debug] testing for sql-injection vulnerability on form at 'http://localhost/setup.php'
+[debug] testing for sql-injection vulnerability on form at 'http://localhost/vulnerabilities/exec/'
+[debug] testing for sql-injection vulnerability on form at 'http://localhost/vulnerabilities/brute/'
+[debug] testing for sql-injection vulnerability on form at 'http://localhost/vulnerabilities/csrf/'
+[debug] testing for sql-injection vulnerability on form at 'http://localhost/vulnerabilities/upload/'
+[debug] testing for sql-injection vulnerability on form at 'http://localhost/vulnerabilities/captcha/'
+[debug] testing for sql-injection vulnerability on form at 'http://localhost/vulnerabilities/sqli_blind/'
+[debug] testing for sql-injection vulnerability on form at 'http://localhost/vulnerabilities/sqli/'
+[debug] testing for sql-injection vulnerability on form at 'http://localhost/vulnerabilities/xss_s/'
+[debug] testing for sql-injection vulnerability on form at 'http://localhost/vulnerabilities/xss_r/'
+[debug] testing for sql-injection vulnerability on form at 'http://localhost/security.php'
+[debug] testing for sql-injection vulnerability on form at 'http://localhost/ids_log.php'
+[info] 1 sql injection vulnerability identified at:
+url: 'http://localhost/vulnerabilities/sqli/'
+data: 'version|5.5.47-0ubuntu0.14.04.1, user|admin@localhost'
+
+-----
+
+slave
+
+> python ../spider.py --verbosity 1 --delay-requests 1000 --slave localhost
+[info] running in slave mode, connecting at 'http://localhost:10080'
+[debug] scraping: 'http://localhost/vulnerabilities/brute/'
+[info] logging in at 'http://localhost/login.php'
+[debug] scraping: 'http://localhost/vulnerabilities/fi/'
+[debug] scraping: 'http://localhost/vulnerabilities/sqli/'
+[debug] scraping: 'http://localhost/vulnerabilities/xss_r/'
+[debug] scraping: 'http://localhost/phpinfo.php'
+```
 
 ### architectual framework components
 #### user input
