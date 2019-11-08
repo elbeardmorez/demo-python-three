@@ -90,6 +90,7 @@ class webserver:
         trace(2, "starting server for master instance")
         self.state = state
         loop = tornado.ioloop.IOLoop(make_current=True)
+        state.event_loops['master-service'] = loop
         httpclient.AsyncHTTPClient.configure(
             "tornado.curl_httpclient.CurlAsyncHTTPClient")
         self.client = httpclient.AsyncHTTPClient(force_instance=True)
@@ -100,6 +101,3 @@ class webserver:
         ])
         self.server.listen(self.state.service[1])
         loop.start()
-
-    def __del__(self):
-        self.server.stop()

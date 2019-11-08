@@ -79,10 +79,12 @@ class runner():
         # setup scope expression
         api.spdr_scope(self.state_)
 
+        service_ = None
         if self.state_.mode == "master":
             # start tornado web server
-            threading.Thread(
-                target=(lambda: remote.webserver(self.state_))).start()
+            service_ = threading.Thread(
+                target=(lambda: remote.webserver(self.state_)))
+            service_.start()
 
             # add a seed url
             self.state_.url_pools['unprocessed'].appendleft(self.state_.target)
@@ -95,6 +97,9 @@ class runner():
         finally:
             if not loop.is_closed():
                 loop.close()
+            if service_ and service_.is_alive():
+                self.state_.event_loops['master-service'].stop()
+                service_.join()
 
         if self.state_.mode == "master":
             results = self.state_.url_pools['vulnerable']
