@@ -219,6 +219,7 @@ extract results from unknown DOM position
 - custom credentials cmdline option
 - support multiple credentials sets
 - parse robots.txt for valid paths, etiquette abuse
+- support multiple slaves
 
 ## dependencies
 - docker
