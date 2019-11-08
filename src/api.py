@@ -1,3 +1,4 @@
+import asyncio
 import urllib
 import re
 import time
@@ -156,19 +157,34 @@ async def spdr_validate_links(parent, links, state):
     return links
 
 
+def purge_successful_tasks(state):
+    state.tasks = [t for t in state.tasks if not t.done() or t.exception()]
+
+
 async def spdr_add_links(parent, links, state):
 
     # TODO: single process GIL -> multi-processing and locks
+    task = asyncio.ensure_future(spdr_validate_links(parent, links, state))
+    state.tasks.append(task)
+    trace(5, f"tasks: [{len(state.tasks)}] {state.tasks}")
+    if len(state.tasks) > 5:
+        l_tasks = len(state.tasks)
+        purge_successful_tasks(state)
+        l_diff = len(state.tasks) - l_tasks
+        if l_diff > 0:
+            trace(2, f"purged {l_diff} task{'s' if l_diff != 1 else ''}" +
+                  f", count: {l_tasks + l_diff}")
+
+    links = await task
+    with state.mutex['unprocessed']:
+        state.url_pools['unprocessed'].extend(links)
+
     if parent:
         # finished processing parent url
         with state.mutex['processed']:
             state.url_pools['processed'][parent] = 1
         with state.mutex['processing']:
             del state.url_pools['processing'][parent]
-
-    links = await spdr_validate_links(parent, links, state)
-    with state.mutex['unprocessed']:
-        state.url_pools['unprocessed'].extend(links)
 
 
 async def spdr_process_urls(state):
@@ -206,6 +222,26 @@ async def spdr_process_urls(state):
                 trace(2, "no work remaining for slave process")
                 break
         return
+
+    # wait for slaves / slave induced tasks
+    purge_successful_tasks(state)
+    if len(state.url_pools['processing']) > 0 or len(state.tasks) > 0:
+        l_processing = len(state.url_pools['processing'])
+        if l_processing > 0:
+            trace(1, f"{l_processing} item{'s' if l_processing != 1 else ''}" +
+                  " remaining in the 'processing' queue due to slave workers" +
+                  ", waiting..")
+        if len(state.tasks) == 0:
+            await asyncio.sleep(2)
+        if len(state.tasks) > 0:
+            await asyncio.gather(*state.tasks)
+        l_processing = len(state.url_pools['processing'])
+        if l_processing > 0:
+            # likely is 'delay-requests' option > 2 seconds for a slave
+            trace(1, f"abandoning {l_processing} item" +
+                  f"{'s' if l_processing != 1 else ''}  remaining in the " +
+                  "'processing' queue:\n" +
+                  '\n'.join(state.url_pools['processing']))
 
     forms = []
     scraper_ = scraper.scraper(state)
