@@ -97,14 +97,14 @@ async def spdr_inject(url, state):
 
 def spdr_next_url(state):
     next_ = None
-        with state.mutex['unprocessed']:
+    with state.mutex['unprocessed']:
         while len(state.url_pools['unprocessed']) > 0:
             next_ = state.url_pools['unprocessed'].popleft()
-        if next_ not in state.url_pools['processed'] and \
-           next_ not in state.url_pools['processing']:
-            with state.mutex['processing']:
-                state.url_pools['processing'][next_] = 1
-            break
+            if next_ not in state.url_pools['processed'] and \
+               next_ not in state.url_pools['processing']:
+                with state.mutex['processing']:
+                    state.url_pools['processing'][next_] = 1
+                break
 
     return next_
 
