@@ -161,10 +161,10 @@ async def spdr_add_links(parent, links, state):
     # TODO: single process GIL -> multi-processing and locks
     if parent:
         # finished processing parent url
-        with state.mutex['processing']:
-            del state.url_pools['processing'][parent]
         with state.mutex['processed']:
             state.url_pools['processed'][parent] = 1
+        with state.mutex['processing']:
+            del state.url_pools['processing'][parent]
 
     links = await spdr_validate_links(parent, links, state)
     with state.mutex['unprocessed']:
