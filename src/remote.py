@@ -1,3 +1,4 @@
+import asyncio
 import json
 import tornado
 from tornado import httpclient, httputil
@@ -76,7 +77,9 @@ class add_links_handler(handler):
         links = data['links']
         trace(2, f"received {len(links)} scraped link" +
               f"{'s' if len(links) != 0 else ''} from slave")
-        await api.spdr_add_links(url, links, self.state)
+        asyncio.run_coroutine_threadsafe(
+            api.spdr_add_links(url, links, self.state),
+            loop=self.state.event_loops[f"{self.state.mode}-main"])
         self.set_status(200)
         self.finish()
 

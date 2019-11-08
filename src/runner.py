@@ -89,6 +89,7 @@ class runner():
 
         # run event loop
         loop = asyncio.get_event_loop()
+        self.state_.event_loops[f"{self.state_.mode}-main"] = loop
         try:
             loop.run_until_complete(api.spdr_process_urls(self.state_))
         finally:

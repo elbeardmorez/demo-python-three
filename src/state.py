@@ -23,6 +23,7 @@ class state:
             self.credentials = [('admin', 'password')]
             self.service = ['localhost', 10080]
             self.delay_requests = 0
+            self.event_loops = {}
             self.verbosity = 0
 
     instance = None
