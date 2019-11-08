@@ -76,7 +76,7 @@ class add_links_handler(handler):
         links = data['links']
         trace(2, f"received {len(links)} scraped link" +
               f"{'s' if len(links) != 0 else ''} from slave")
-        api.spdr_add_links(url, links, self.state)
+        await api.spdr_add_links(url, links, self.state)
         self.set_status(200)
         self.finish()
 
