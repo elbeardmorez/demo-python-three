@@ -188,10 +188,12 @@ async def spdr_process_urls(state):
             trace(2, "slave: requesting next url")
             response = await client.pull(
                            f"{spdr_service_address(state)}/next_url")
-            if response.code == 200:
-                if state.delay_requests > 0:
-                    time.sleep(state.delay_requests / 1000)
-                url = json.loads(response.body)['url']
+            if response.code != 200:
+                break
+            if state.delay_requests > 0:
+                time.sleep(state.delay_requests / 1000)
+            url = json.loads(response.body)['url']
+            if url:
                 links = await scraper_.scrape(url)
                 body = json.dumps({'url': url, 'links': links})
                 trace(2, "slave: pushing scraped links")

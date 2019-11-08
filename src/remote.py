@@ -58,13 +58,10 @@ class next_url_handler(handler):
 
     async def get(self):
         next_ = api.spdr_next_url(self.state)
+        self.set_status(200)
         if next_:
-            self.set_status(200)
             trace(2, f"pushing url '{next_}' to slave")
-            self.finish({'url': next_})
-        else:
-            self.set_status(500)
-            self.finish()
+        self.finish({'url': next_})
 
 
 class add_links_handler(handler):
